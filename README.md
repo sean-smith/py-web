@@ -8,11 +8,11 @@ Usage
 
 Simply type <code>webserver</code> into shell:
 
-'''python
-$ webserver
-Serving 127.0.0.1 on port 5000
-To shut down press Ctrl-c
-'''
+
+    $ webserver
+    Serving 127.0.0.1 on port 5000
+    To shut down press Ctrl-c
+
 
 This will automatically start a server on localhost (127.0.0.1) with port 5000. This server serves your current directory.
 
