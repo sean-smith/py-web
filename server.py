@@ -1,9 +1,11 @@
 import BaseHTTPServer
 from optparse import OptionParser
-import os, time, sys
-import logging
+import os
+import time
+import sys
 from watchdog.observers import Observer
-from watchdog.events import LoggingEventHandler
+from watchdog.events import FileSystemEventHandler
+
 
 class Py_Web:
     def __init__(self):
@@ -31,24 +33,48 @@ class Py_Web:
         """
         Runs the program
         """
-        try:
-            handler = BaseHTTPServer.BaseHTTPRequestHandler
-            httpd = BaseHTTPServer.HTTPServer((host, port), handler)
-
-            if not reload:
-                print("serving "+host+" on port "+str(port))
-                print("To shut down press Ctrl-c")
+        if not reload:
+            try:
+                httpd = self.reload(host, port)
                 httpd.serve_forever()
-            else:
-                while reload_not_true():
-                    httpd.handle_request()
+            except KeyboardInterrupt as e:
+                print("Shutting Down...")
+        else:
+            self.reloadable_run(host, port)
 
-        except KeyboardInterrupt as e:
+
+    def reloadable_run(self):
+        httpd = self.reload(host, port)
+        self.watch_file_structure(httpd)
+
+    def reload(self, host, port):
+        """
+        Reloads the Server
+        """
+        print("serving "+host+" on port "+str(port))
+        print("To shut down press Ctrl-c")
+        handler = BaseHTTPServer.BaseHTTPRequestHandler
+        return BaseHTTPServer.HTTPServer((host, port), handler)
+
+    def watch_file_structure(self, httpd):
+        path = '.'
+        event_handler = MyHandler()
+        observer = Observer()
+        observer.schedule(event_handler, path, recursive=True)
+        observer.start()
+        try:
+            while True:
+                httpd.handle_request()
+        except KeyboardInterrupt:
+            observer.stop()
             print("Shutting Down...")
+        observer.join()
 
-    def reload_not_true(self):
-        current = os.listdir()
-        
+
+class MyHandler(FileSystemEventHandler):
+    def on_any_event(self, event):
+        print("detecting "+event.event_type+" "+event.src_path)
+        print("Reloading Server...")
 
 
 if __name__ == "__main__":
