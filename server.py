@@ -71,10 +71,11 @@ class Py_Web:
         observer.join()
 
 
-class MyHandler(FileSystemEventHandler):
+class MyHandler(FileSystemEventHandler, Py_Web):
     def on_any_event(self, event):
         print("detecting "+event.event_type+" "+event.src_path)
         print("Reloading Server...")
+        self.reload("0.0.0.0", 80)
 
 
 if __name__ == "__main__":
