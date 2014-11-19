@@ -43,7 +43,7 @@ class Py_Web:
             self.reloadable_run(host, port)
 
 
-    def reloadable_run(self):
+    def reloadable_run(self, host, port):
         httpd = self.reload(host, port)
         self.watch_file_structure(httpd)
 
@@ -51,7 +51,7 @@ class Py_Web:
         """
         Reloads the Server
         """
-        print("serving "+host+" on port "+str(port))
+        print("Serving "+host+" on port "+str(port))
         print("To shut down press Ctrl-c")
         handler = BaseHTTPServer.BaseHTTPRequestHandler
         return BaseHTTPServer.HTTPServer((host, port), handler)
