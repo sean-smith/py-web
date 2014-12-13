@@ -25,9 +25,9 @@ class Py_Web:
                   help="Reload Automatically True/False, default is True")
         (options, args) = parser.parse_args()
         if options.reload.lower() == "true":
-            self.reload = True
+            self.reload_on = True
         else:
-            self.reload = False
+            self.reload_on = False
         self.host = options.host
         self.port = int(options.PORT)
         self.run()
@@ -37,7 +37,7 @@ class Py_Web:
         """
         Runs the program
         """
-        if not self.reload:
+        if not self.reload_on:
             try:
                 httpd = self.reload()
                 httpd.serve_forever()
@@ -48,7 +48,7 @@ class Py_Web:
 
 
     def reloadable_run(self):
-        httpd = self.reload(self.host, self.port)
+        httpd = self.reload()
         self.watch_file_structure(httpd)
 
     def reload(self):
@@ -68,22 +68,26 @@ class Py_Web:
         observer.start()
         try:
             while not changed:
-                httpd.handle_request()
+                self.start_server()
             self.reloadable_run()
         except KeyboardInterrupt:
             observer.stop()
             print("Shutting Down...")
         observer.join()
 
+    def start_server(self):
+        httpd.handle_request()
 
 class Server_Commands(BaseHTTPServer.BaseHTTPRequestHandler):
+
+    _extension_map = {"html": "text/html", "css": "text/css", "js": "application/javascript"}
     def do_HEAD(s):
         s.response(200)
         s.header("Content-type", "text/html")
         s.end_headers()
     def do_GET(s):
         req_path = s.path
-        path = os.listdir
+        path = os.listdir()
         if req_path=="/" and "index.html" in path:
             file = "index.html"
         elif s.path in path:
@@ -91,15 +95,20 @@ class Server_Commands(BaseHTTPServer.BaseHTTPRequestHandler):
         else:
             s.response(404)
             return
-        s.header("content-type", file.)
+        s.header("content-type", self.get_type())
         s.response(200)
         s.response
         s.wfile("<html><head></head><body><h1> Sean\'s webpage</h1></body></html>")
-    def get_type():
-        get_Type(
+
+    def get_type(file_name):
+        lst = file_name.split(".")
+        extension = lst[-1]
+        return _extension_map[extension]
 
 
-class MyHandler(FileSystemEventHandler, Py_Web):
+
+
+class MyHandler(FileSystemEventHandler):
     def on_any_event(self, event):
         print("detecting "+event.event_type+" "+event.src_path)
         print("Reloading Server...")
